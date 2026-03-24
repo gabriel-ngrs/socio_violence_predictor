@@ -66,9 +66,9 @@ Projeto acadêmico da disciplina de Aprendizagem de Máquina — UFPB (2025.1).
 #### Etapa 4 — Modelos (notebooks independentes)
 - [x] **Notebook 04** (`notebooks/04_modelo_rede_neural.ipynb`) — Keras/TensorFlow
   - Arquitetura [15→16→8→1]: d_VC=401, N/d_VC=11.1 — satisfaz Regra de Ouro
-  - Regularização L2 (λ=0.001) + Dropout (20%) + Early Stopping (parou na época 148, melhor=128)
-  - E_in=29.51%, E_out=33.57%, Gap=4.06% (sem overfitting)
-  - Acurácia=66.4%, Precisão=67.2%, Recall=64.3%, F1=65.7%
+  - Regularização L2 (λ=0.0001) + Dropout (10%) + Early Stopping (parou na época 110, melhor=85)
+  - E_in=30.25%, E_out=33.48%, Gap=3.23% (sem overfitting)
+  - Acurácia=66.5%, Precisão=65.6%, Recall=69.5%, F1=67.5%
 - [ ] **Notebook 05** (`notebooks/05_modelo_arvore_decisao.ipynb`) — Scikit-Learn
   - Pruning via **Minimal Cost-Complexity** (alpha) + cross-validation
   - Visualizar a árvore podada
