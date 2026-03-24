@@ -87,13 +87,15 @@ Projeto acadêmico da disciplina de Aprendizagem de Máquina — UFPB (2025.1).
   - Curvas ROC sobrepostas com AUC; heatmap E_in/E_out/Gap
   - Modelo vencedor: SVM (F1=68.2%, AUC maior, gap=2.1%)
   - Resposta à pergunta central: Sim, com desempenho moderado (+16.6pp acima do acaso)
-- [ ] **Relatório final** (`reports/relatorio.md`)
-  - Descrever metodologia, resultados e conclusões em prosa
-  - Mencionar limitações: dados Atlas Brasil são de 2010, 26 municípios imputados, subnotificação no Sinesp
-- [ ] **Módulos `src/`** — refatorar funções reutilizadas dos notebooks em:
+- [x] **Relatório final** (`reports/relatorio.md`)
+  - 9 seções completas: dataset, pré-processamento, 3 modelos, comparação, diagnóstico, conclusão
+  - Todos os resultados numéricos reais, tabelas e referências ABNT
+  - Gerado também em DOCX ABNT NBR 14724:2011 (`reports/relatorio_abnt.docx`) via `reports/gerar_docx_abnt.py`
+  - **Pendente:** preencher nomes dos autores na capa
+- [x] **Módulos `src/`** — todos implementados:
   - `src/data_loader.py` — carregar e cruzar datasets
   - `src/preprocessing.py` — normalização, split, feature engineering
-  - `src/models.py` — definição dos 3 modelos
+  - `src/models.py` — definição dos 3 modelos (NN, Árvore, SVM)
   - `src/evaluation.py` — métricas e plots padronizados
   - `src/utils.py` — funções auxiliares
 
