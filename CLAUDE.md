@@ -34,6 +34,41 @@ Apresentação: 31 de março de 2026.
 - **Chave de cruzamento:** código IBGE do município (7 dígitos)
 - **Dataset final esperado:** ~5.570 linhas × ~13 features + 1 alvo
 
+## Fluxo de Desenvolvimento (Git)
+
+### Branches
+- `main` — intocável até tudo estar revisado e correto
+- `dev` — base de desenvolvimento; origem de todas as branches individuais
+- `dev-gabriel`, `dev-fabio`, ... — branches individuais por colaborador
+
+### Ciclo de trabalho
+1. Puxar da `dev` para a branch individual (`git checkout -b dev-nome origin/dev`)
+2. Desenvolver na branch individual
+3. Abrir PR da branch individual → `dev`
+4. Após revisão e merge na `dev`, repetir o ciclo
+5. Merge da `dev` → `main` apenas quando o projeto estiver estável
+
+### Conventional Commits
+Todos os commits **devem** seguir o padrão [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+<tipo>(escopo opcional): descrição curta em português
+
+Corpo opcional com mais detalhes.
+```
+
+Tipos aceitos: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `data`
+
+Exemplos:
+```
+feat(notebooks): adiciona notebook de análise exploratória
+fix(preprocessing): corrige normalização das features de renda
+data: adiciona dataset do Sinesp 2022
+docs: atualiza instruções de execução no README
+```
+
+---
+
 ## Convenções de Código
 
 - Python 3.10+
