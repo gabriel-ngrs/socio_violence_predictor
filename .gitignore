@@ -1,0 +1,41 @@
+# Dados brutos e processados
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Modelos treinados
+models/*
+!models/.gitkeep
+
+# Python
+*.pyc
+__pycache__/
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Ambiente
+.env
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Dados na raiz
+/*.xlsx
+/*.csv
+
+# OS
+.DS_Store
+Thumbs.db
