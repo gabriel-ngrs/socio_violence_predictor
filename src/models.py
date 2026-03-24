@@ -61,21 +61,48 @@ def build_neural_network(
     input_dim: int,
     hidden_layers: list[int],
     learning_rate: float = 0.001,
+    l2_reg: float = 0.001,
+    dropout_rate: float = 0.2,
 ):
     """Constrói o modelo de rede neural com Keras.
 
-    A arquitetura deve ser justificada pela dimensão VC e Regra de Ouro.
-    Usar o Teorema da Aproximação Universal (pelo menos 1 camada oculta).
+    A arquitetura é justificada pela dimensão VC e Regra de Ouro.
+    Usa o Teorema da Aproximação Universal (pelo menos 1 camada oculta com ReLU).
+    Regularização via L2 e Dropout para controlar overfitting.
 
     Args:
         input_dim: Número de features de entrada.
         hidden_layers: Lista com neurônios por camada oculta.
-        learning_rate: Taxa de aprendizado do otimizador.
+        learning_rate: Taxa de aprendizado do otimizador Adam.
+        l2_reg: Coeficiente de regularização L2.
+        dropout_rate: Taxa de Dropout após cada camada oculta.
 
     Returns:
         Modelo Keras compilado.
     """
-    raise NotImplementedError("TODO: Implementar construção da rede neural com Keras")
+    import tensorflow as tf
+    from tensorflow import keras
+    from tensorflow.keras import layers, regularizers
+
+    model = keras.Sequential()
+    model.add(layers.Input(shape=(input_dim,)))
+
+    for n_units in hidden_layers:
+        model.add(layers.Dense(
+            n_units,
+            activation='relu',
+            kernel_regularizer=regularizers.l2(l2_reg),
+        ))
+        model.add(layers.Dropout(dropout_rate))
+
+    model.add(layers.Dense(1, activation='sigmoid'))
+
+    model.compile(
+        optimizer=keras.optimizers.Adam(learning_rate=learning_rate),
+        loss='binary_crossentropy',
+        metrics=['accuracy'],
+    )
+    return model
 
 
 def train_neural_network(
@@ -84,24 +111,43 @@ def train_neural_network(
     y_train: np.ndarray,
     X_val: np.ndarray,
     y_val: np.ndarray,
-    epochs: int = 100,
-    batch_size: int = 32,
+    epochs: int = 200,
+    batch_size: int = 64,
+    patience: int = 20,
 ):
-    """Treina a rede neural e retorna o histórico.
+    """Treina a rede neural com early stopping e retorna o histórico.
 
     Args:
         model: Modelo Keras compilado.
         X_train: Features de treino.
         y_train: Alvo de treino.
-        X_val: Features de validação.
+        X_val: Features de validação (não é o teste final).
         y_val: Alvo de validação.
-        epochs: Número de épocas.
+        epochs: Número máximo de épocas.
         batch_size: Tamanho do batch.
+        patience: Épocas sem melhora antes de parar (early stopping).
 
     Returns:
         Histórico de treinamento (history object do Keras).
     """
-    raise NotImplementedError("TODO: Implementar treinamento da rede neural")
+    from tensorflow.keras.callbacks import EarlyStopping
+
+    early_stop = EarlyStopping(
+        monitor='val_loss',
+        patience=patience,
+        restore_best_weights=True,
+        verbose=1,
+    )
+
+    history = model.fit(
+        X_train, y_train,
+        validation_data=(X_val, y_val),
+        epochs=epochs,
+        batch_size=batch_size,
+        callbacks=[early_stop],
+        verbose=0,
+    )
+    return history
 
 
 def build_decision_tree(random_state: int = 42) -> DecisionTreeClassifier:

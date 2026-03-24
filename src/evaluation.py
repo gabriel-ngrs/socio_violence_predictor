@@ -77,13 +77,47 @@ def plot_overfitting_curve(
     history,
     save_path: Optional[str] = None,
 ) -> None:
-    """Plota curvas de E_in e E_out por época (para rede neural).
+    """Plota curvas de loss e acurácia por época (E_in vs E_val) para rede neural.
+
+    Identifica visualmente a época de melhor generalização (menor val_loss).
 
     Args:
         history: Objeto history retornado pelo Keras fit().
         save_path: Caminho para salvar o gráfico. Se None, apenas exibe.
     """
-    raise NotImplementedError("TODO: Implementar plot de curvas de overfitting")
+    hist = history.history
+    epochs = range(1, len(hist['loss']) + 1)
+    best_epoch = int(np.argmin(hist['val_loss'])) + 1
+
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+    # Loss
+    axes[0].plot(epochs, hist['loss'], label='Treino (E_in)', color='steelblue')
+    axes[0].plot(epochs, hist['val_loss'], label='Validação (E_val)', color='tomato')
+    axes[0].axvline(best_epoch, color='green', linestyle='--', linewidth=1.5,
+                    label=f'Melhor época: {best_epoch}')
+    axes[0].set_title('Curva de Loss por Época')
+    axes[0].set_xlabel('Época')
+    axes[0].set_ylabel('Binary Cross-Entropy Loss')
+    axes[0].legend()
+
+    # Accuracy
+    axes[1].plot(epochs, hist['accuracy'], label='Treino', color='steelblue')
+    axes[1].plot(epochs, hist['val_accuracy'], label='Validação', color='tomato')
+    axes[1].axvline(best_epoch, color='green', linestyle='--', linewidth=1.5,
+                    label=f'Melhor época: {best_epoch}')
+    axes[1].set_title('Acurácia por Época')
+    axes[1].set_xlabel('Época')
+    axes[1].set_ylabel('Acurácia')
+    axes[1].legend()
+
+    plt.suptitle('Análise de Overfitting — Rede Neural', fontsize=14)
+    plt.tight_layout()
+
+    if save_path:
+        plt.savefig(save_path, dpi=150, bbox_inches='tight')
+    plt.show()
+    print(f"Melhor época (menor val_loss): {best_epoch} / {len(epochs)}")
 
 
 def plot_confusion_matrix(

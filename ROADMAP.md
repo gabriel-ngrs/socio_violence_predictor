@@ -64,11 +64,11 @@ Projeto acadêmico da disciplina de Aprendizagem de Máquina — UFPB (2025.1).
   - Scaler salvo em `models/scaler.joblib`
 
 #### Etapa 4 — Modelos (notebooks independentes)
-- [ ] **Notebook 04** (`notebooks/04_modelo_rede_neural.ipynb`) — Keras/TensorFlow
-  - Calcular **dimensão VC** e aplicar **Regra de Ouro** (N ≥ 10 × VC_dim) para justificar arquitetura
-  - Lembrar dos biases ao contar parâmetros
-  - Regularização: L2 e/ou Dropout + early stopping
-  - Métricas: acurácia, precisão, recall, F1, E_in, E_out
+- [x] **Notebook 04** (`notebooks/04_modelo_rede_neural.ipynb`) — Keras/TensorFlow
+  - Arquitetura [15→16→8→1]: d_VC=401, N/d_VC=11.1 — satisfaz Regra de Ouro
+  - Regularização L2 (λ=0.001) + Dropout (20%) + Early Stopping (parou na época 148, melhor=128)
+  - E_in=29.51%, E_out=33.57%, Gap=4.06% (sem overfitting)
+  - Acurácia=66.4%, Precisão=67.2%, Recall=64.3%, F1=65.7%
 - [ ] **Notebook 05** (`notebooks/05_modelo_arvore_decisao.ipynb`) — Scikit-Learn
   - Pruning via **Minimal Cost-Complexity** (alpha) + cross-validation
   - Visualizar a árvore podada
