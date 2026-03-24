@@ -69,10 +69,11 @@ Projeto acadêmico da disciplina de Aprendizagem de Máquina — UFPB (2025.1).
   - Regularização L2 (λ=0.0001) + Dropout (10%) + Early Stopping (parou na época 110, melhor=85)
   - E_in=30.25%, E_out=33.48%, Gap=3.23% (sem overfitting)
   - Acurácia=66.5%, Precisão=65.6%, Recall=69.5%, F1=67.5%
-- [ ] **Notebook 05** (`notebooks/05_modelo_arvore_decisao.ipynb`) — Scikit-Learn
-  - Pruning via **Minimal Cost-Complexity** (alpha) + cross-validation
-  - Visualizar a árvore podada
-  - Métricas: acurácia, precisão, recall, F1, E_in, E_out
+- [x] **Notebook 05** (`notebooks/05_modelo_arvore_decisao.ipynb`) — Scikit-Learn
+  - Sem poda: E_in=0%, E_out=39.3%, 821 folhas — overfitting severo comprovado
+  - α ótimo=0.002514 por CV 5-fold (415 candidatos): árvore com prof=5, 11 folhas
+  - E_in=30.1%, E_out=34.2%, Gap=4.1% (sem overfitting)
+  - Acurácia=65.8%, Precisão=65.3%, Recall=67.5%, F1=66.4%
 - [ ] **Notebook 06** (`notebooks/06_modelo_svm.ipynb`) — Scikit-Learn
   - **GridSearchCV** para C e gamma (kernel RBF)
   - Calcular **E_out esperado** baseado no número de vetores de suporte: `E_out ≤ E[sv] / N`

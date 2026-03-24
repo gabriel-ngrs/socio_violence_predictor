@@ -170,7 +170,8 @@ def prune_decision_tree(
 ) -> Tuple[DecisionTreeClassifier, dict]:
     """Realiza pruning da árvore via Minimal Cost-Complexity com cross validation.
 
-    Encontra o alpha ótimo que minimiza: Pureza(T) + alpha * #folhas(T)
+    Encontra o alpha ótimo que minimiza: Pureza(T) + alpha * #folhas(T).
+    Usa cross_val_score sobre o conjunto de treino para cada alpha candidato.
 
     Args:
         X_train: Features de treino.
@@ -179,9 +180,41 @@ def prune_decision_tree(
         random_state: Seed para reprodutibilidade.
 
     Returns:
-        Tupla (melhor_arvore, resultados_cv).
+        Tupla (melhor_arvore, resultados_cv) onde resultados_cv contém
+        alphas, médias e desvios padrões dos scores de validação.
     """
-    raise NotImplementedError("TODO: Implementar pruning com Minimal Cost-Complexity")
+    from sklearn.model_selection import cross_val_score
+
+    # Obtém o caminho de alphas possíveis
+    base_tree = DecisionTreeClassifier(random_state=random_state)
+    path = base_tree.cost_complexity_pruning_path(X_train, y_train)
+    alphas = path.ccp_alphas[:-1]  # Remove o último (árvore trivial)
+
+    # Avalia cada alpha com cross validation
+    mean_scores, std_scores = [], []
+    for alpha in alphas:
+        tree = DecisionTreeClassifier(ccp_alpha=alpha, random_state=random_state)
+        scores = cross_val_score(tree, X_train, y_train, cv=cv_folds, scoring='accuracy')
+        mean_scores.append(scores.mean())
+        std_scores.append(scores.std())
+
+    # Alpha ótimo: maior média de acurácia em CV
+    best_idx = int(np.argmax(mean_scores))
+    best_alpha = alphas[best_idx]
+
+    # Treina a árvore final com o alpha ótimo sobre todo o treino
+    best_tree = DecisionTreeClassifier(ccp_alpha=best_alpha, random_state=random_state)
+    best_tree.fit(X_train, y_train)
+
+    cv_results = {
+        "alphas": alphas,
+        "mean_scores": np.array(mean_scores),
+        "std_scores": np.array(std_scores),
+        "best_alpha": best_alpha,
+        "best_cv_score": mean_scores[best_idx],
+        "best_idx": best_idx,
+    }
+    return best_tree, cv_results
 
 
 def build_svm(
