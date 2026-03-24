@@ -71,7 +71,8 @@ Projeto acadêmico da disciplina de Aprendizagem de Máquina — UFPB (2025.1).
   - Acurácia=66.5%, Precisão=65.6%, Recall=69.5%, F1=67.5%
 - [x] **Notebook 05** (`notebooks/05_modelo_arvore_decisao.ipynb`) — Scikit-Learn
   - Sem poda: E_in=0%, E_out=39.3%, 821 folhas — overfitting severo comprovado
-  - α ótimo=0.002514 por CV 5-fold (415 candidatos): árvore com prof=5, 11 folhas
+  - α ótimo=0.002514 por CV 10-fold / scoring=F1 (415 candidatos): prof=5, 11 folhas
+  - Regra 1-SE avaliada e descartada (α=0.009144, 4 folhas, F1=63.1% — pior)
   - E_in=30.1%, E_out=34.2%, Gap=4.1% (sem overfitting)
   - Acurácia=65.8%, Precisão=65.3%, Recall=67.5%, F1=66.4%
 - [ ] **Notebook 06** (`notebooks/06_modelo_svm.ipynb`) — Scikit-Learn

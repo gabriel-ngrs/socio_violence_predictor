@@ -165,54 +165,74 @@ def build_decision_tree(random_state: int = 42) -> DecisionTreeClassifier:
 def prune_decision_tree(
     X_train: np.ndarray,
     y_train: np.ndarray,
-    cv_folds: int = 5,
+    cv_folds: int = 10,
+    scoring: str = "f1",
     random_state: int = 42,
 ) -> Tuple[DecisionTreeClassifier, dict]:
     """Realiza pruning da árvore via Minimal Cost-Complexity com cross validation.
 
-    Encontra o alpha ótimo que minimiza: Pureza(T) + alpha * #folhas(T).
-    Usa cross_val_score sobre o conjunto de treino para cada alpha candidato.
+    Encontra o alpha ótimo que maximiza o score CV.
+    Também calcula o alpha pela Regra 1-SE (modelo mais simples dentro de 1
+    desvio padrão do melhor score) para comparação.
 
     Args:
         X_train: Features de treino.
         y_train: Alvo de treino.
-        cv_folds: Número de folds para cross validation.
+        cv_folds: Número de folds para cross validation. Default 10 para
+                  estimativas mais estáveis com N=4456 (cada fold ~446 amostras).
+        scoring: Métrica para seleção do alpha. 'f1' é mais adequado para
+                 classificação binária com classes balanceadas que 'accuracy'.
         random_state: Seed para reprodutibilidade.
 
     Returns:
         Tupla (melhor_arvore, resultados_cv) onde resultados_cv contém
-        alphas, médias e desvios padrões dos scores de validação.
+        alphas, scores de CV, alpha ótimo e alpha pela regra 1-SE.
     """
     from sklearn.model_selection import cross_val_score
 
     # Obtém o caminho de alphas possíveis
     base_tree = DecisionTreeClassifier(random_state=random_state)
     path = base_tree.cost_complexity_pruning_path(X_train, y_train)
-    alphas = path.ccp_alphas[:-1]  # Remove o último (árvore trivial)
+    alphas = path.ccp_alphas[:-1]  # Remove o último (árvore trivial com 1 folha)
 
     # Avalia cada alpha com cross validation
     mean_scores, std_scores = [], []
     for alpha in alphas:
         tree = DecisionTreeClassifier(ccp_alpha=alpha, random_state=random_state)
-        scores = cross_val_score(tree, X_train, y_train, cv=cv_folds, scoring='accuracy')
+        scores = cross_val_score(tree, X_train, y_train, cv=cv_folds, scoring=scoring)
         mean_scores.append(scores.mean())
         std_scores.append(scores.std())
 
-    # Alpha ótimo: maior média de acurácia em CV
-    best_idx = int(np.argmax(mean_scores))
+    mean_scores = np.array(mean_scores)
+    std_scores  = np.array(std_scores)
+
+    # Alpha ótimo: maior score médio em CV
+    best_idx   = int(np.argmax(mean_scores))
     best_alpha = alphas[best_idx]
 
-    # Treina a árvore final com o alpha ótimo sobre todo o treino
+    # Regra 1-SE: modelo mais simples cujo score >= melhor_score - 1*std
+    # (alpha maior = árvore mais simples, então busca o maior alpha válido)
+    threshold_1se = mean_scores[best_idx] - std_scores[best_idx]
+    valid_1se = np.where(mean_scores >= threshold_1se)[0]
+    best_idx_1se   = int(valid_1se[-1])   # maior índice = maior alpha = árvore mais simples
+    best_alpha_1se = alphas[best_idx_1se]
+
+    # Treina a árvore final com o alpha ótimo
     best_tree = DecisionTreeClassifier(ccp_alpha=best_alpha, random_state=random_state)
     best_tree.fit(X_train, y_train)
 
     cv_results = {
         "alphas": alphas,
-        "mean_scores": np.array(mean_scores),
-        "std_scores": np.array(std_scores),
+        "mean_scores": mean_scores,
+        "std_scores": std_scores,
         "best_alpha": best_alpha,
         "best_cv_score": mean_scores[best_idx],
         "best_idx": best_idx,
+        "best_alpha_1se": best_alpha_1se,
+        "best_cv_score_1se": mean_scores[best_idx_1se],
+        "best_idx_1se": best_idx_1se,
+        "scoring": scoring,
+        "cv_folds": cv_folds,
     }
     return best_tree, cv_results
 
