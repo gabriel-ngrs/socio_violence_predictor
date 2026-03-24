@@ -75,10 +75,11 @@ Projeto acadêmico da disciplina de Aprendizagem de Máquina — UFPB (2025.1).
   - Regra 1-SE avaliada e descartada (α=0.009144, 4 folhas, F1=63.1% — pior)
   - E_in=30.1%, E_out=34.2%, Gap=4.1% (sem overfitting)
   - Acurácia=65.8%, Precisão=65.3%, Recall=67.5%, F1=66.4%
-- [ ] **Notebook 06** (`notebooks/06_modelo_svm.ipynb`) — Scikit-Learn
-  - **GridSearchCV** para C e gamma (kernel RBF)
-  - Calcular **E_out esperado** baseado no número de vetores de suporte: `E_out ≤ E[sv] / N`
-  - Métricas: acurácia, precisão, recall, F1, E_in, E_out
+- [x] **Notebook 06** (`notebooks/06_modelo_svm.ipynb`) — Scikit-Learn
+  - GridSearchCV 5×5 (C×γ), cv=10-fold, scoring=F1: melhor C=100, γ=0.001
+  - Vetores de suporte: 3233/4456 (72.6%) | E_out esperado ≤ 72.6% | E_out empírico=33.4% ✓
+  - E_in=31.3%, E_out=33.4%, Gap=2.1% (sem overfitting)
+  - Acurácia=66.6%, Precisão=65.1%, Recall=71.5%, F1=68.2% — **melhor modelo**
 
 #### Etapa 5 — Comparação e Relatório
 - [ ] **Notebook 07** (`notebooks/07_comparacao_modelos.ipynb`)

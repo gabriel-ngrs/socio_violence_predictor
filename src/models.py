@@ -240,21 +240,43 @@ def prune_decision_tree(
 def build_svm(
     X_train: np.ndarray,
     y_train: np.ndarray,
-    cv_folds: int = 5,
+    cv_folds: int = 10,
     random_state: int = 42,
 ) -> Tuple[SVC, GridSearchCV]:
-    """Constrói e treina SVM com GridSearchCV para C e gamma.
+    """Constrói e treina SVM com kernel RBF via GridSearchCV para C e gamma.
+
+    A grade cobre 4 décadas de C e gamma em escala logarítmica.
+    cv=10 folds para estimativas de baixo viés com N=4456 (mesma justificativa
+    da árvore de decisão).
 
     Args:
-        X_train: Features de treino.
+        X_train: Features de treino (deve estar normalizado — obrigatório para SVM).
         y_train: Alvo de treino.
         cv_folds: Número de folds para cross validation.
         random_state: Seed para reprodutibilidade.
 
     Returns:
-        Tupla (melhor_svm, grid_search_results).
+        Tupla (melhor_svm, grid_search) onde grid_search é o GridSearchCV ajustado.
     """
-    raise NotImplementedError("TODO: Implementar SVM com GridSearchCV")
+    param_grid = {
+        "C":     [0.01, 0.1, 1, 10, 100],
+        "gamma": [0.001, 0.01, 0.1, 1, "scale"],
+    }
+
+    base_svm = SVC(kernel="rbf", random_state=random_state, probability=False)
+
+    grid_search = GridSearchCV(
+        base_svm,
+        param_grid,
+        cv=cv_folds,
+        scoring="f1",
+        n_jobs=-1,
+        refit=True,
+        verbose=0,
+    )
+    grid_search.fit(X_train, y_train)
+
+    return grid_search.best_estimator_, grid_search
 
 
 def svm_expected_eout(n_support_vectors: int, n_samples: int) -> float:
