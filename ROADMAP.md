@@ -82,10 +82,11 @@ Projeto acadêmico da disciplina de Aprendizagem de Máquina — UFPB (2025.1).
   - Acurácia=66.6%, Precisão=65.1%, Recall=71.5%, F1=68.2% — **melhor modelo**
 
 #### Etapa 5 — Comparação e Relatório
-- [ ] **Notebook 07** (`notebooks/07_comparacao_modelos.ipynb`)
-  - Tabela comparativa dos 3 modelos: todas as métricas lado a lado
-  - Curvas ROC sobrepostas
-  - Resposta à pergunta central com base nos resultados
+- [x] **Notebook 07** (`notebooks/07_comparacao_modelos.ipynb`)
+  - Tabela comparativa: Acurácia, Precisão, Recall, F1, E_in, E_out, Gap
+  - Curvas ROC sobrepostas com AUC; heatmap E_in/E_out/Gap
+  - Modelo vencedor: SVM (F1=68.2%, AUC maior, gap=2.1%)
+  - Resposta à pergunta central: Sim, com desempenho moderado (+16.6pp acima do acaso)
 - [ ] **Relatório final** (`reports/relatorio.md`)
   - Descrever metodologia, resultados e conclusões em prosa
   - Mencionar limitações: dados Atlas Brasil são de 2010, 26 municípios imputados, subnotificação no Sinesp

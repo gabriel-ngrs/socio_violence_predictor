@@ -154,14 +154,45 @@ def plot_confusion_matrix(
     plt.show()
 
 
-def compare_models(results: dict) -> None:
-    """Compara os 3 modelos lado a lado.
+def compare_models(
+    results: dict,
+    save_path: Optional[str] = None,
+) -> None:
+    """Plota gráfico de barras comparando as métricas dos 3 modelos lado a lado.
 
     Args:
         results: Dicionário com resultados de cada modelo.
-                 Ex: {"Rede Neural": {...}, "Árvore de Decisão": {...}, "SVM": {...}}
+                 Ex: {"Rede Neural": {"accuracy": 0.66, ...}, ...}
+        save_path: Caminho para salvar o gráfico. Se None, apenas exibe.
     """
-    raise NotImplementedError("TODO: Implementar comparação visual dos modelos")
+    metrics = ["accuracy", "precision", "recall", "f1_score"]
+    labels  = ["Acurácia", "Precisão", "Recall", "F1-score"]
+    models  = list(results.keys())
+    colors  = ["steelblue", "tomato", "seagreen"]
+
+    x = np.arange(len(metrics))
+    width = 0.25
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    for i, (model, color) in enumerate(zip(models, colors)):
+        vals = [results[model][m] for m in metrics]
+        bars = ax.bar(x + i * width, vals, width, label=model, color=color, alpha=0.85)
+        for bar, v in zip(bars, vals):
+            ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.005,
+                    f'{v:.3f}', ha='center', va='bottom', fontsize=9)
+
+    ax.set_xticks(x + width)
+    ax.set_xticklabels(labels, fontsize=12)
+    ax.set_ylabel('Score')
+    ax.set_ylim(0, 1.0)
+    ax.set_title('Comparação dos 3 Modelos — Métricas no Conjunto de Teste', fontsize=14)
+    ax.legend(fontsize=11)
+    ax.axhline(0.5, color='gray', linestyle='--', linewidth=1, alpha=0.5, label='Baseline aleatório')
+    plt.tight_layout()
+
+    if save_path:
+        plt.savefig(save_path, dpi=150, bbox_inches='tight')
+    plt.show()
 
 
 def print_classification_report(
