@@ -57,10 +57,11 @@ Projeto acadêmico da disciplina de Aprendizagem de Máquina — UFPB (2025.1).
   - Todo texto explicativo em markdown (exigência do relatório)
 
 #### Etapa 3 — Pré-processamento
-- [ ] **Notebook 03** (`notebooks/03_preprocessamento.ipynb`)
+- [x] **Notebook 03** (`notebooks/03_preprocessamento.ipynb`)
   - Split treino/teste **80/20 estratificado** por `alta_violencia` — **não tocar no teste até a etapa final**
-  - Normalização/padronização: **justificar** a escolha (StandardScaler obrigatório para SVM e NN; opcional para árvore)
-  - Salvar os conjuntos em `data/processed/`: `X_train`, `X_test`, `y_train`, `y_test`
+  - Normalização/padronização: StandardScaler justificado (obrigatório para SVM e NN)
+  - Salvo em `data/processed/`: `X_train.npy`, `X_test.npy`, `y_train.npy`, `y_test.npy`, `feature_names.txt`
+  - Scaler salvo em `models/scaler.joblib`
 
 #### Etapa 4 — Modelos (notebooks independentes)
 - [ ] **Notebook 04** (`notebooks/04_modelo_rede_neural.ipynb`) — Keras/TensorFlow
