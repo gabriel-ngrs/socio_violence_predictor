@@ -49,11 +49,10 @@ Projeto acadêmico da disciplina de Aprendizagem de Máquina — UFPB (2025.1).
 ### 🔲 Pendente — em ordem de execução
 
 #### Etapa 2 — Análise Exploratória
-- [ ] **Notebook 02** (`notebooks/02_analise_exploratoria.ipynb`)
+- [x] **Notebook 02** (`notebooks/02_analise_exploratoria.ipynb`)
   - Distribuições de cada feature (histogramas, boxplots)
   - Matriz de correlação entre features
   - Análise bivariada: cada feature vs. `alta_violencia`
-  - Mapa geográfico de violência por município (se possível com `geopandas`)
   - Identificar features com maior poder discriminativo
   - Todo texto explicativo em markdown (exigência do relatório)
 
