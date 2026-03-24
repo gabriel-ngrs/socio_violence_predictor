@@ -61,21 +61,48 @@ def build_neural_network(
     input_dim: int,
     hidden_layers: list[int],
     learning_rate: float = 0.001,
+    l2_reg: float = 0.001,
+    dropout_rate: float = 0.2,
 ):
     """Constrói o modelo de rede neural com Keras.
 
-    A arquitetura deve ser justificada pela dimensão VC e Regra de Ouro.
-    Usar o Teorema da Aproximação Universal (pelo menos 1 camada oculta).
+    A arquitetura é justificada pela dimensão VC e Regra de Ouro.
+    Usa o Teorema da Aproximação Universal (pelo menos 1 camada oculta com ReLU).
+    Regularização via L2 e Dropout para controlar overfitting.
 
     Args:
         input_dim: Número de features de entrada.
         hidden_layers: Lista com neurônios por camada oculta.
-        learning_rate: Taxa de aprendizado do otimizador.
+        learning_rate: Taxa de aprendizado do otimizador Adam.
+        l2_reg: Coeficiente de regularização L2.
+        dropout_rate: Taxa de Dropout após cada camada oculta.
 
     Returns:
         Modelo Keras compilado.
     """
-    raise NotImplementedError("TODO: Implementar construção da rede neural com Keras")
+    import tensorflow as tf
+    from tensorflow import keras
+    from tensorflow.keras import layers, regularizers
+
+    model = keras.Sequential()
+    model.add(layers.Input(shape=(input_dim,)))
+
+    for n_units in hidden_layers:
+        model.add(layers.Dense(
+            n_units,
+            activation='relu',
+            kernel_regularizer=regularizers.l2(l2_reg),
+        ))
+        model.add(layers.Dropout(dropout_rate))
+
+    model.add(layers.Dense(1, activation='sigmoid'))
+
+    model.compile(
+        optimizer=keras.optimizers.Adam(learning_rate=learning_rate),
+        loss='binary_crossentropy',
+        metrics=['accuracy'],
+    )
+    return model
 
 
 def train_neural_network(
@@ -84,24 +111,43 @@ def train_neural_network(
     y_train: np.ndarray,
     X_val: np.ndarray,
     y_val: np.ndarray,
-    epochs: int = 100,
-    batch_size: int = 32,
+    epochs: int = 200,
+    batch_size: int = 64,
+    patience: int = 20,
 ):
-    """Treina a rede neural e retorna o histórico.
+    """Treina a rede neural com early stopping e retorna o histórico.
 
     Args:
         model: Modelo Keras compilado.
         X_train: Features de treino.
         y_train: Alvo de treino.
-        X_val: Features de validação.
+        X_val: Features de validação (não é o teste final).
         y_val: Alvo de validação.
-        epochs: Número de épocas.
+        epochs: Número máximo de épocas.
         batch_size: Tamanho do batch.
+        patience: Épocas sem melhora antes de parar (early stopping).
 
     Returns:
         Histórico de treinamento (history object do Keras).
     """
-    raise NotImplementedError("TODO: Implementar treinamento da rede neural")
+    from tensorflow.keras.callbacks import EarlyStopping
+
+    early_stop = EarlyStopping(
+        monitor='val_loss',
+        patience=patience,
+        restore_best_weights=True,
+        verbose=1,
+    )
+
+    history = model.fit(
+        X_train, y_train,
+        validation_data=(X_val, y_val),
+        epochs=epochs,
+        batch_size=batch_size,
+        callbacks=[early_stop],
+        verbose=0,
+    )
+    return history
 
 
 def build_decision_tree(random_state: int = 42) -> DecisionTreeClassifier:
@@ -119,43 +165,118 @@ def build_decision_tree(random_state: int = 42) -> DecisionTreeClassifier:
 def prune_decision_tree(
     X_train: np.ndarray,
     y_train: np.ndarray,
-    cv_folds: int = 5,
+    cv_folds: int = 10,
+    scoring: str = "f1",
     random_state: int = 42,
 ) -> Tuple[DecisionTreeClassifier, dict]:
     """Realiza pruning da árvore via Minimal Cost-Complexity com cross validation.
 
-    Encontra o alpha ótimo que minimiza: Pureza(T) + alpha * #folhas(T)
+    Encontra o alpha ótimo que maximiza o score CV.
+    Também calcula o alpha pela Regra 1-SE (modelo mais simples dentro de 1
+    desvio padrão do melhor score) para comparação.
 
     Args:
         X_train: Features de treino.
         y_train: Alvo de treino.
-        cv_folds: Número de folds para cross validation.
+        cv_folds: Número de folds para cross validation. Default 10 para
+                  estimativas mais estáveis com N=4456 (cada fold ~446 amostras).
+        scoring: Métrica para seleção do alpha. 'f1' é mais adequado para
+                 classificação binária com classes balanceadas que 'accuracy'.
         random_state: Seed para reprodutibilidade.
 
     Returns:
-        Tupla (melhor_arvore, resultados_cv).
+        Tupla (melhor_arvore, resultados_cv) onde resultados_cv contém
+        alphas, scores de CV, alpha ótimo e alpha pela regra 1-SE.
     """
-    raise NotImplementedError("TODO: Implementar pruning com Minimal Cost-Complexity")
+    from sklearn.model_selection import cross_val_score
+
+    # Obtém o caminho de alphas possíveis
+    base_tree = DecisionTreeClassifier(random_state=random_state)
+    path = base_tree.cost_complexity_pruning_path(X_train, y_train)
+    alphas = path.ccp_alphas[:-1]  # Remove o último (árvore trivial com 1 folha)
+
+    # Avalia cada alpha com cross validation
+    mean_scores, std_scores = [], []
+    for alpha in alphas:
+        tree = DecisionTreeClassifier(ccp_alpha=alpha, random_state=random_state)
+        scores = cross_val_score(tree, X_train, y_train, cv=cv_folds, scoring=scoring)
+        mean_scores.append(scores.mean())
+        std_scores.append(scores.std())
+
+    mean_scores = np.array(mean_scores)
+    std_scores  = np.array(std_scores)
+
+    # Alpha ótimo: maior score médio em CV
+    best_idx   = int(np.argmax(mean_scores))
+    best_alpha = alphas[best_idx]
+
+    # Regra 1-SE: modelo mais simples cujo score >= melhor_score - 1*std
+    # (alpha maior = árvore mais simples, então busca o maior alpha válido)
+    threshold_1se = mean_scores[best_idx] - std_scores[best_idx]
+    valid_1se = np.where(mean_scores >= threshold_1se)[0]
+    best_idx_1se   = int(valid_1se[-1])   # maior índice = maior alpha = árvore mais simples
+    best_alpha_1se = alphas[best_idx_1se]
+
+    # Treina a árvore final com o alpha ótimo
+    best_tree = DecisionTreeClassifier(ccp_alpha=best_alpha, random_state=random_state)
+    best_tree.fit(X_train, y_train)
+
+    cv_results = {
+        "alphas": alphas,
+        "mean_scores": mean_scores,
+        "std_scores": std_scores,
+        "best_alpha": best_alpha,
+        "best_cv_score": mean_scores[best_idx],
+        "best_idx": best_idx,
+        "best_alpha_1se": best_alpha_1se,
+        "best_cv_score_1se": mean_scores[best_idx_1se],
+        "best_idx_1se": best_idx_1se,
+        "scoring": scoring,
+        "cv_folds": cv_folds,
+    }
+    return best_tree, cv_results
 
 
 def build_svm(
     X_train: np.ndarray,
     y_train: np.ndarray,
-    cv_folds: int = 5,
+    cv_folds: int = 10,
     random_state: int = 42,
 ) -> Tuple[SVC, GridSearchCV]:
-    """Constrói e treina SVM com GridSearchCV para C e gamma.
+    """Constrói e treina SVM com kernel RBF via GridSearchCV para C e gamma.
+
+    A grade cobre 4 décadas de C e gamma em escala logarítmica.
+    cv=10 folds para estimativas de baixo viés com N=4456 (mesma justificativa
+    da árvore de decisão).
 
     Args:
-        X_train: Features de treino.
+        X_train: Features de treino (deve estar normalizado — obrigatório para SVM).
         y_train: Alvo de treino.
         cv_folds: Número de folds para cross validation.
         random_state: Seed para reprodutibilidade.
 
     Returns:
-        Tupla (melhor_svm, grid_search_results).
+        Tupla (melhor_svm, grid_search) onde grid_search é o GridSearchCV ajustado.
     """
-    raise NotImplementedError("TODO: Implementar SVM com GridSearchCV")
+    param_grid = {
+        "C":     [0.01, 0.1, 1, 10, 100],
+        "gamma": [0.001, 0.01, 0.1, 1, "scale"],
+    }
+
+    base_svm = SVC(kernel="rbf", random_state=random_state, probability=False)
+
+    grid_search = GridSearchCV(
+        base_svm,
+        param_grid,
+        cv=cv_folds,
+        scoring="f1",
+        n_jobs=-1,
+        refit=True,
+        verbose=0,
+    )
+    grid_search.fit(X_train, y_train)
+
+    return grid_search.best_estimator_, grid_search
 
 
 def svm_expected_eout(n_support_vectors: int, n_samples: int) -> float:
