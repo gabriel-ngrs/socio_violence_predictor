@@ -32,7 +32,7 @@ Apresentação: 31 de março de 2026.
 - **Variável alvo (y):** Sinesp/MJ — homicídios dolosos por município → taxa per capita (×100k) → mediana como threshold → binário
 - **Features (X):** PIB per capita, IDHM (geral + 3 sub), Gini, taxa de urbanização, densidade demográfica, analfabetismo 15+, renda per capita, % pobres, desemprego 18+, % jovens 15-29, % esgotamento sanitário, população total
 - **Chave de cruzamento:** código IBGE do município (7 dígitos)
-- **Dataset final esperado:** ~5.570 linhas × ~13 features + 1 alvo
+- **Dataset final:** 5.570 linhas × 15 features + 1 alvo (`data/processed/dataset_municipios.csv`)
 
 ## Fluxo de Desenvolvimento (Git)
 
@@ -106,8 +106,9 @@ socio-violence-predictor/
 │   ├── evaluation.py         # Métricas e plots
 │   └── utils.py              # Funções auxiliares
 ├── reports/
-│   ├── figures/              # Gráficos gerados
-│   └── relatorio.md          # Relatório final
+│   ├── figures/              # Gráficos gerados (20 arquivos PNG)
+│   ├── relatorio.md          # Relatório final completo
+│   └── relatorio_abnt.docx   # Relatório em formato DOCX ABNT NBR 14724:2011
 └── models/                   # Modelos salvos (gitignored)
 ```
 
