@@ -1,13 +1,3 @@
-# Dados brutos e processados
-data/raw/*
-data/processed/*
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-
-# Modelos treinados
-models/*
-!models/.gitkeep
-
 # Python
 *.pyc
 __pycache__/
