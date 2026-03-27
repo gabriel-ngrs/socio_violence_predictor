@@ -77,13 +77,47 @@ def plot_overfitting_curve(
     history,
     save_path: Optional[str] = None,
 ) -> None:
-    """Plota curvas de E_in e E_out por época (para rede neural).
+    """Plota curvas de loss e acurácia por época (E_in vs E_val) para rede neural.
+
+    Identifica visualmente a época de melhor generalização (menor val_loss).
 
     Args:
         history: Objeto history retornado pelo Keras fit().
         save_path: Caminho para salvar o gráfico. Se None, apenas exibe.
     """
-    raise NotImplementedError("TODO: Implementar plot de curvas de overfitting")
+    hist = history.history
+    epochs = range(1, len(hist['loss']) + 1)
+    best_epoch = int(np.argmin(hist['val_loss'])) + 1
+
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+    # Loss
+    axes[0].plot(epochs, hist['loss'], label='Treino (E_in)', color='steelblue')
+    axes[0].plot(epochs, hist['val_loss'], label='Validação (E_val)', color='tomato')
+    axes[0].axvline(best_epoch, color='green', linestyle='--', linewidth=1.5,
+                    label=f'Melhor época: {best_epoch}')
+    axes[0].set_title('Curva de Loss por Época')
+    axes[0].set_xlabel('Época')
+    axes[0].set_ylabel('Binary Cross-Entropy Loss')
+    axes[0].legend()
+
+    # Accuracy
+    axes[1].plot(epochs, hist['accuracy'], label='Treino', color='steelblue')
+    axes[1].plot(epochs, hist['val_accuracy'], label='Validação', color='tomato')
+    axes[1].axvline(best_epoch, color='green', linestyle='--', linewidth=1.5,
+                    label=f'Melhor época: {best_epoch}')
+    axes[1].set_title('Acurácia por Época')
+    axes[1].set_xlabel('Época')
+    axes[1].set_ylabel('Acurácia')
+    axes[1].legend()
+
+    plt.suptitle('Análise de Overfitting — Rede Neural', fontsize=14)
+    plt.tight_layout()
+
+    if save_path:
+        plt.savefig(save_path, dpi=150, bbox_inches='tight')
+    plt.show()
+    print(f"Melhor época (menor val_loss): {best_epoch} / {len(epochs)}")
 
 
 def plot_confusion_matrix(
@@ -120,14 +154,45 @@ def plot_confusion_matrix(
     plt.show()
 
 
-def compare_models(results: dict) -> None:
-    """Compara os 3 modelos lado a lado.
+def compare_models(
+    results: dict,
+    save_path: Optional[str] = None,
+) -> None:
+    """Plota gráfico de barras comparando as métricas dos 3 modelos lado a lado.
 
     Args:
         results: Dicionário com resultados de cada modelo.
-                 Ex: {"Rede Neural": {...}, "Árvore de Decisão": {...}, "SVM": {...}}
+                 Ex: {"Rede Neural": {"accuracy": 0.66, ...}, ...}
+        save_path: Caminho para salvar o gráfico. Se None, apenas exibe.
     """
-    raise NotImplementedError("TODO: Implementar comparação visual dos modelos")
+    metrics = ["accuracy", "precision", "recall", "f1_score"]
+    labels  = ["Acurácia", "Precisão", "Recall", "F1-score"]
+    models  = list(results.keys())
+    colors  = ["steelblue", "tomato", "seagreen"]
+
+    x = np.arange(len(metrics))
+    width = 0.25
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    for i, (model, color) in enumerate(zip(models, colors)):
+        vals = [results[model][m] for m in metrics]
+        bars = ax.bar(x + i * width, vals, width, label=model, color=color, alpha=0.85)
+        for bar, v in zip(bars, vals):
+            ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.005,
+                    f'{v:.3f}', ha='center', va='bottom', fontsize=9)
+
+    ax.set_xticks(x + width)
+    ax.set_xticklabels(labels, fontsize=12)
+    ax.set_ylabel('Score')
+    ax.set_ylim(0, 1.0)
+    ax.set_title('Comparação dos 3 Modelos — Métricas no Conjunto de Teste', fontsize=14)
+    ax.legend(fontsize=11)
+    ax.axhline(0.5, color='gray', linestyle='--', linewidth=1, alpha=0.5, label='Baseline aleatório')
+    plt.tight_layout()
+
+    if save_path:
+        plt.savefig(save_path, dpi=150, bbox_inches='tight')
+    plt.show()
 
 
 def print_classification_report(

@@ -12,18 +12,31 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 
+FEATURES = [
+    "pop_total", "pop_urbana_pct", "perc_jovens_15_29",
+    "renda_per_capita", "taxa_desemprego", "taxa_analfabetismo_15",
+    "perc_esgoto_adequado", "gini", "idhm", "idhm_renda",
+    "idhm_longevidade", "idhm_educacao", "perc_pobres",
+    "pib_per_capita", "densidade_demografica",
+]
+TARGET = "alta_violencia"
+
+
 def split_features_target(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.Series]:
     """Separa o DataFrame em matriz de features X e vetor alvo y.
 
-    Remove colunas não-feature (cod_ibge, alta_violencia, taxa_homicidios, etc.).
+    Remove colunas não-feature (cod_ibge, alta_violencia, taxa_homicidios).
+    Dados de crime nunca entram como features.
 
     Args:
         df: DataFrame completo com features e variável alvo.
 
     Returns:
-        Tupla (X, y) onde X são as features e y é a variável alvo.
+        Tupla (X, y) onde X são as features socioeconômicas e y é a variável alvo.
     """
-    raise NotImplementedError("TODO: Implementar separação X/y")
+    X = df[FEATURES].copy()
+    y = df[TARGET].copy()
+    return X, y
 
 
 def split_train_test(
@@ -81,17 +94,24 @@ def normalize_features(
 
 
 def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
-    """Trata valores ausentes no dataset.
+    """Verifica e trata valores ausentes no dataset.
 
-    Estratégia a ser definida após análise exploratória.
+    O dataset já vem sem nulos após o notebook 01 (imputação pela mediana).
+    Esta função serve como verificação de sanidade e garante o contrato.
 
     Args:
         df: DataFrame com possíveis valores ausentes.
 
     Returns:
         DataFrame sem valores ausentes.
+
+    Raises:
+        ValueError: Se nulos forem encontrados em colunas críticas.
     """
-    raise NotImplementedError("TODO: Implementar tratamento de missing values")
+    null_counts = df[FEATURES + [TARGET]].isnull().sum()
+    if null_counts.any():
+        raise ValueError(f"Nulos encontrados:\n{null_counts[null_counts > 0]}")
+    return df
 
 
 def get_dataset_info(X: pd.DataFrame, y: pd.Series) -> dict:
