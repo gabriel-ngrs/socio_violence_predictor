@@ -1,0 +1,15 @@
+pop_total
+pop_urbana_pct
+perc_jovens_15_29
+renda_per_capita
+taxa_desemprego
+taxa_analfabetismo_15
+perc_esgoto_adequado
+gini
+idhm
+idhm_renda
+idhm_longevidade
+idhm_educacao
+perc_pobres
+pib_per_capita
+densidade_demografica
