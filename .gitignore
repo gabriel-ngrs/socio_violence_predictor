@@ -16,6 +16,12 @@ build/
 venv/
 env/
 
+# Artefatos gerados
+models/*.joblib
+models/*.keras
+reports/figures/*.png
+data/processed/model_results.csv
+
 # IDE
 .vscode/
 .idea/
