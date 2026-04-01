@@ -173,11 +173,10 @@ A Regra de Ouro é satisfeita. A existência de pelo menos uma camada oculta com
 
 ### 4.2 Regularização
 
-Para controlar o overfitting, foram aplicadas três formas complementares de regularização:
+Para controlar o overfitting, foram aplicadas duas estratégias:
 
-- **Regularização L2** (λ = 0,0001): penaliza pesos grandes, incentivando soluções mais suaves.
-- **Dropout** (taxa = 10%): desativa aleatoriamente 10% dos neurônios a cada batch durante o treino, reduzindo co-adaptações e funcionando como um ensemble implícito.
-- **Early Stopping** (paciência = 25 épocas): monitora a loss de validação e restaura os pesos da melhor época, evitando o overfitting tardio.
+- **Early Stopping** (paciência = 12 épocas): monitora a loss de validação e restaura os pesos da melhor época.
+- **Semente fixa + execução determinística**: reduz variação entre execuções da rede para comparação estável.
 
 ### 4.3 Parâmetros de Treinamento
 
@@ -186,23 +185,23 @@ Para controlar o overfitting, foram aplicadas três formas complementares de reg
 | Otimizador | Adam (lr = 0,001) | Adaptativo, convergência rápida |
 | Função de loss | Binary cross-entropy | Padrão para classificação binária com saída sigmóide |
 | Batch size | 64 | Equilíbrio entre estabilidade do gradiente e velocidade |
-| Épocas máximas | 300 | Limite superior; early stopping interrompe antes |
-| Melhor época | 85 (parada na 110) | Determinada pelo menor val_loss |
+| Épocas máximas | 120 | Limite superior; early stopping interrompe antes |
+| Melhor época | 29 (parada na 41) | Determinada pelo menor val_loss |
 | Split interno | 80% treino efetivo / 20% validação | Validação interna para early stopping |
 
 ### 4.4 Resultados
 
 | Métrica | Valor |
 |---|---|
-| E_in (erro de treino) | 30,25% |
-| E_out (erro de teste) | 33,48% |
-| Gap (E_out − E_in) | 3,23% |
-| Acurácia | 66,52% |
-| Precisão | 65,59% |
-| Recall | 69,48% |
-| F1-score | 67,48% |
+| E_in (erro de treino) | 30,77% |
+| E_out (erro de teste) | 34,02% |
+| Gap (E_out − E_in) | 3,25% |
+| Acurácia | 65,98% |
+| Precisão | 66,30% |
+| Recall | 64,99% |
+| F1-score | 65,64% |
 
-O gap de 3,23% está abaixo do limiar de 5% adotado como critério de overfitting, confirmando que a regularização foi eficaz. A curva de loss por época demonstra convergência estável com val_loss acompanhando a train_loss sem divergência expressiva.
+O gap de 3,25% está abaixo do limiar de 5% adotado como critério de overfitting, confirmando que a regularização foi eficaz. A curva de loss por época demonstra convergência estável sem divergência expressiva entre treino e validação.
 
 ---
 
@@ -215,10 +214,10 @@ Uma árvore de decisão irrestrita foi treinada como experimento inicial. O resu
 | Métrica | Sem poda |
 |---|---|
 | E_in | 0,00% |
-| E_out | 39,30% |
-| Gap | 39,30% |
+| E_out | 39,32% |
+| Gap | 39,32% |
 | Folhas | 821 |
-| Profundidade máxima | 33 |
+| Profundidade máxima | 24 |
 
 E_in = 0% indica memorização perfeita do treino. O gap de 39,3 pontos percentuais confirma que a árvore não generalizou — poda é necessária.
 
@@ -254,8 +253,8 @@ O critério da **Regra 1-SE** (modelo mais simples dentro de 1 desvio padrão do
 | E_out | 34,20% |
 | Gap | 4,10% |
 | Acurácia | 65,80% |
-| Precisão | 65,29% |
-| Recall | 67,52% |
+| Precisão | 65,28% |
+| Recall | 67,50% |
 | F1-score | 66,37% |
 
 A feature com maior importância na árvore podada foi `perc_jovens_15_29`, seguida de `idhm_longevidade` e `renda_per_capita` — resultado consistente com a análise de correlação da fase exploratória.
@@ -303,8 +302,8 @@ O erro empírico observado foi E_out = 33,39%, satisfazendo o limite teórico (3
 | E_out | 33,39% |
 | Gap | 2,09% |
 | Acurácia | 66,61% |
-| Precisão | 65,06% |
-| Recall | 71,52% |
+| Precisão | 65,14% |
+| Recall | 71,45% |
 | F1-score | 68,15% |
 
 ---
@@ -316,8 +315,8 @@ O erro empírico observado foi E_out = 33,39%, satisfazendo o limite teórico (3
 | Modelo | Acurácia | Precisão | Recall | F1-score | E_in | E_out | Gap |
 |---|---|---|---|---|---|---|---|
 | **SVM (RBF)** | **66,6%** | 65,1% | **71,5%** | **68,2%** | 31,3% | 33,4% | **2,1%** |
-| Rede Neural | 66,5% | **65,6%** | 69,5% | 67,5% | 30,3% | 33,5% | 3,2% |
 | Árvore de Decisão | 65,8% | 65,3% | 67,5% | 66,4% | **30,1%** | 34,2% | 4,1% |
+| Rede Neural | 66,0% | **66,3%** | 65,0% | 65,6% | 30,8% | 34,0% | 3,3% |
 
 ### 7.2 Estratégia de Validação
 
@@ -375,7 +374,7 @@ Para a rede neural, o limiar padrão de 0,5 pode ser ajustado conforme o context
 |---|---|---|---|
 | 0,35 | **0,700** | 63,1% | **86,2%** |
 | 0,40 | 0,697 | 64,7% | 81,0% |
-| 0,50 | 0,675 | 66,5% | 69,5% |
+| 0,50 | 0,656 | 66,0% | 65,0% |
 
 Com limiar = 0,35, a rede neural identifica corretamente 86 em cada 100 municípios de alta violência, ao custo de mais falsos alarmes. Essa configuração é preferível quando o custo de não intervir supera o custo de intervenção desnecessária.
 
