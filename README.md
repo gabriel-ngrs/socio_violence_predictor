@@ -12,7 +12,7 @@ notebooks/
 └── 02_modelagem_e_validacao.ipynb
 ```
 
-- Notebook 01: coleta (carga do consolidado), checagem, EDA minima, `X` e `y`, `N` e `p`, split e padronizacao.
+- Notebook 01: coleta dos `raw`, tratamento, montagem do dataset, EDA minima, `X` e `y`, `N` e `p`, split e padronizacao.
 - Notebook 02: treino e avaliacao de Rede Neural, Arvore de Decisao e SVM, com comparacao final.
 
 ## Como rodar
@@ -38,5 +38,11 @@ Executar em ordem:
 
 ## Dados usados na apresentacao
 
-- `data/raw/`: fontes originais ja baixadas.
-- `data/processed/dataset_municipios.csv`: base consolidada usada para o fluxo enxuto.
+- `data/raw/`: apenas os arquivos usados no pipeline:
+  - `censo2022_municipios.csv`
+  - `atlas_brasil_municipios.xlsx`
+  - `ibge_municipios_ref.csv`
+  - `pib_municipios_sidra_2021.csv`
+  - `areas_municipios_2024.xls`
+  - `sinesp_municipios.xlsx`
+- `data/processed/`: inicia vazio (apenas `.gitkeep`) e e preenchido durante a execucao do notebook 01.
